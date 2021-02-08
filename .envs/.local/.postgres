@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=playstore_review_crawler
+POSTGRES_USER=VJouVyapHVpZEwXJzUYdgOmvMcYYGsAT
+POSTGRES_PASSWORD=ukLl01G6zrHdyXZhaA8okWWtR1WrG9ecHBhjfmSVe7uzG2EGjrbgWyh1ohYct8OX
