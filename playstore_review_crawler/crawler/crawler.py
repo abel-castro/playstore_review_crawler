@@ -65,29 +65,33 @@ class Crawler:
         Before the reviews will be saved, all existing reviews for the passed
         app_id will be deleted.
         """
-        reviews = self.get_reviews(amount=amount, language=language, country=country)
+        review_data = self.get_reviews(amount=amount, language=language, country=country)
 
-        if not reviews:
+        if not review_data:
             logger.info(f"0 reviews found for the app {self.app_id}.")
             return
 
         self.clear_app_reviews()
         app, app_created = App.objects.get_or_create(app_id=self.app_id)
 
-        for review in reviews:
+        reviews_instances_to_create = []
+        for data in review_data:
+            review_instance = Review(
+                app=app,
+                review_id=data["reviewId"],
+                user_name=data["userName"],
+                user_image=data.get("userImage"),
+                content=data.get("content", ""),
+                score=data["score"],
+                thumbs_up_count=data["thumbsUpCount"],
+                review_created_version=data["reviewCreatedVersion"],
+                at=make_aware(data["at"]),
+                reply_content=data.get("replyContent", None),
+                replied_at=make_aware_if_is_not_none(data.get("repliedAt", None)),
+            )
+            reviews_instances_to_create.append(review_instance)
             self.amount_reviews_saved += 1
 
-            Review.objects.create(
-                app=app,
-                review_id=review["reviewId"],
-                user_name=review["userName"],
-                user_image=review.get("userImage"),
-                content=review.get("content", ""),
-                score=review["score"],
-                thumbs_up_count=review["thumbsUpCount"],
-                review_created_version=review["reviewCreatedVersion"],
-                at=make_aware(review["at"]),
-                reply_content=review.get("replyContent", None),
-                replied_at=make_aware_if_is_not_none(review.get("repliedAt", None)),
-            )
+        Review.objects.bulk_create(reviews_instances_to_create)
+
         logger.info(f"{self.amount_reviews_saved} reviews saved in the DB.")
